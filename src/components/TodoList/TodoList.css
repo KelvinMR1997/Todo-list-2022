@@ -1,0 +1,47 @@
+.techStackSection {
+  margin-top: 40px;
+  height: auto;
+}
+.sectionTitle h5 {
+  text-align: center;
+}
+.techContent {
+  border-radius: 1rem;
+  padding: 8px;
+  color: black;
+  margin-top: 50px;
+  box-shadow: 0px 10px 15px 11px rgba(0, 0, 0, 0.1);
+}
+.techContent p {
+  font-size: 16px;
+}
+
+.techContent:hover {
+  /* background-image: linear-gradient(120deg, #f6d365 0%, #fda085 100%); */
+  background-image: linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%);
+  color: rgb(133, 158, 65);
+  cursor: pointer; /* TODO: CHANGE THIS */
+  box-shadow: 20px 18px 0px -5px rgba(0, 0, 0, 0.1);
+  transition-duration: 1s;
+}
+.techIcon {
+  border-radius: 90px;
+  width: 50px;
+  text-align: center;
+  align-items: center;
+  display: block;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: -35px;
+  line-height: 50px;
+}
+.itemSelected {
+  background-image: linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%);
+  color: rgb(133, 158, 65);
+  cursor: pointer; /* TODO: CHANGE THIS */
+  box-shadow: 20px 18px 0px -5px rgba(0, 0, 0, 0.1);
+  transition-duration: 1s;
+}
+.actionSection svg{  
+  margin-left: 5px;
+}
