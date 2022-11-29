@@ -43,6 +43,25 @@ export const convertDate = (date) => {
   return moment(date).format("DD/MM/YYYY");
 };
 export const cutHour = (hour) => {
-  let arr = hour.split(".");
-  return arr[0];
+  if (!isEmptyOrUndefined(hour)) {
+    let arr = hour?.split(".");
+    return arr[0];
+  }
+};
+export const today = () => {
+  let today = new Date();
+  let dd = today.getDate();
+  let mm = today.getMonth() + 1; //January is 0!
+  let yyyy = today.getFullYear();
+
+  if (dd < 10) {
+    dd = "0" + dd;
+  }
+
+  if (mm < 10) {
+    mm = "0" + mm;
+  }
+
+  today = yyyy + "-" + mm + "-" + dd; //AAA-MM-DD
+  return today;
 };

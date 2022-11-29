@@ -18,3 +18,18 @@ code {
 .shadow {
   box-shadow: 0px 10px 15px 11px rgba(0, 0, 0, 0.1) !important;
 }
+textarea {
+  border-radius: 5px;
+  color: rgba(0, 63, 128, 0.5);
+  border: 1px solid #a3bad1;
+  height: 32px;
+  padding-left: 5px;
+  overflow: hidden;
+}
+textarea:focus {
+  color: gray;
+}
+.bordered {
+  border-bottom: 1px dashed rgb(150, 148, 148);
+  /* border-left: 2px dashed rgb(150, 148, 148); */
+}
