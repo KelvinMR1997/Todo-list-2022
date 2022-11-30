@@ -1,20 +1,26 @@
 import React from "react";
-import { FcCheckmark, FcExpired } from "react-icons/fc";
-import { convertDate, cutHour } from "../helpers/helpers";
+import { FcCheckmark, FcExpired, FcSpeaker } from "react-icons/fc";
+import { convertDate, cutHour, speak } from "../helpers/helpers";
 
 export const ShowDetails = (props) => {
   return (
     <>
-      <div className="container mb-3 "
-      style={{ wordBreak: "break-all"}}
-      >
+      <div className="container mb-3 " style={{ wordBreak: "break-all" }}>
         <div className="row bordered">
           <label className="col-lg-6 col-md6 col-xs-12">Nombre: </label>
           <p className="col-lg-6 col-md6 col-xs-12">{props?.name}</p>
         </div>
         <div className="row bordered">
           <label className="col-lg-6 col-md6 col-xs-12 ">Descripcion: </label>
-          <p className="col-lg-6 col-md6 col-xs-12 ">{props?.description}</p>
+          <p className="col-lg-6 col-md6 col-xs-12 ">
+            {props?.description}
+            <FcSpeaker
+              title="Escuchar"
+              onClick={() => speak(props?.description)}
+              size={25}
+              className="pb-1 iconHover cPointer"
+            />
+          </p>
         </div>
         <div className="row bordered">
           <label className="col-lg-6 col-md6 col-xs-12">Fecha: </label>
