@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useGetMethod } from "../../Hooks/useFetch";
+import { useGetMethod, usePostMethod } from "../../Hooks/useFetch";
 import { Line } from "../helpers/Line";
 import "./TodoList.css";
 import { FcCheckmark, FcExpired } from "react-icons/fc";
@@ -8,11 +8,17 @@ import {
   BsFillTrashFill,
   BsPlusSquare,
 } from "react-icons/bs";
-import { convertDate, cutHour, isEmptyOrUndefined } from "../helpers/helpers";
+import {
+  convertDate,
+  cutHour,
+  isEmptyOrUndefined,
+  today,
+} from "../helpers/helpers";
 import CustomModal from "../Modal/CustomModal";
-import { CustomForm } from "../Form/CustomForm";
 import { ShowDetails } from "../ShowDetails/ShowDetails";
 import { CustomSpinner } from "./CustomSpinner";
+import CustomToast from "../Toast/CustomToast";
+import { Form } from "react-bootstrap";
 
 export const TodoList = () => {
   const [modal, setModal] = useState({
@@ -20,12 +26,23 @@ export const TodoList = () => {
     entry: null,
     data: null,
   });
-  console.log("modal: ", modal);
+  const [trigger, setTrigger] = useState(0);
+  const [showToast, setShowToast] = useState({
+    show: false,
+    message: "",
+    title: "",
+  });
+  /* -------------------------------- GET TASKS ------------------------------- */
   const {
     results: tasks,
     load: tasksLoader,
     trigger: getTasks,
   } = useGetMethod();
+
+  /* ------------------------------ MUTATE TASKS ------------------------------ */
+  const { load: removeTaskLoader, trigger: removeTask } = usePostMethod();
+  const { load: changeStatusLoader, trigger: changeStatus } = usePostMethod();
+  const { load: createNewTaskLoader, trigger: createNewTask } = usePostMethod();
 
   useEffect(() => {
     getTasks({
@@ -34,10 +51,97 @@ export const TodoList = () => {
         order: "id",
       },
     });
-  }, [getTasks]);
+  }, [getTasks, trigger]);
 
-  const handleModalAction = () => {
-    return alert("bien");
+  const handleModalAction = (actionType) => {
+    if (actionType === "remove") {
+      return removeTask({
+        url: "/tasks",
+        method: "DELETE",
+        params: {
+          id: `eq.${modal?.data?.id}`,
+        },
+        doAfterSuccess: (data) => {
+          if (data?.ok) {
+            setTrigger(trigger + 1);
+            handleCloseModal();
+            setShowToast({
+              show: true,
+              message: "La tarea ha sido borrada con exito",
+              title: "Tarea eliminada",
+            });
+          }
+        },
+      });
+    }
+    if (actionType === "changeStatus") {
+      return changeStatus({
+        url: "/tasks",
+        method: "PATCH",
+        params: {
+          id: `eq.${modal?.data?.id}`,
+        },
+        body: {
+          status: true,
+        },
+        doAfterSuccess: (data) => {
+          if (data?.ok) {
+            setTrigger(trigger + 1);
+            handleCloseModal();
+            setShowToast({
+              show: true,
+              message: "La tarea ha sido terminada con exito",
+              title: "Tarea finalizada",
+            });
+          }
+        },
+      });
+    }
+    if (actionType === "creating" || actionType === "edit") {
+      if (
+        isEmptyOrUndefined(modal?.data?.name) ||
+        isEmptyOrUndefined(modal?.data?.description) ||
+        isEmptyOrUndefined(modal?.data?.date) ||
+        isEmptyOrUndefined(modal?.data?.hour)
+      ) {
+        setShowToast({
+          show: true,
+          message: "Por favor llene todos los campos",
+          title: `Todos los campos son obligatorios`,
+          warning: true,
+        });
+        return;
+      }
+      let { name, description, date, hour } = modal?.data;
+      return createNewTask({
+        url: "/tasks",
+        method: actionType === "creating" ? "POST" : "PATCH",
+        params: {
+          id: actionType === "edit" ? `eq.${modal?.data?.id}` : "",
+        },
+        body: {
+          name,
+          description,
+          date,
+          hour,
+        },
+        doAfterSuccess: (res) => {
+          if (res?.ok) {
+            setTrigger(trigger + 1);
+            handleCloseModal();
+            setShowToast({
+              show: true,
+              message: `La tarea ha sido ${
+                actionType === "edit" ? "actualizada" : "creada"
+              } con exito`,
+              title: `Tarea ${
+                actionType === "edit" ? "actualizada" : "creada"
+              } `,
+            });
+          }
+        },
+      });
+    }
   };
   const handleShowModal = (data, entry) => {
     entry === "creating"
@@ -47,17 +151,43 @@ export const TodoList = () => {
   const handleCloseModal = () => {
     setModal({ show: false, entry: null, data: null });
   };
+
   return (
     <>
+      {/* /* ---------------------------------- Toast --------------------------------- */}
+      <CustomToast
+        show={showToast.show}
+        message={showToast.message}
+        title={showToast.title}
+        warning={showToast?.warning}
+        onHide={() =>
+          setShowToast({
+            show: false,
+            message: "",
+            title: "",
+          })
+        }
+      />
+      {removeTaskLoader ?? <CustomSpinner />}
+      {changeStatusLoader ?? <CustomSpinner />}
+      {createNewTaskLoader ?? <CustomSpinner />}
       {/* /* ---------------------------------- Modal --------------------------------- */}
       <CustomModal
-        title={modal.entry === "remove" ? "Eliminar Tarea" : modal?.data?.name}
+        title={
+          modal.entry === "remove"
+            ? "Eliminar Tarea"
+            : modal?.entry === "creating"
+            ? "Crear nueva tarea"
+            : modal?.data?.name
+        }
         show={modal.show}
         btnYesName={
           modal.entry === "remove"
             ? "Eliminar"
             : modal.entry === "changeStatus"
             ? "Si,terminé"
+            : modal.entry === "edit"
+            ? "Actualizar"
             : "Guardar"
         }
         size={modal.entry === "detail" ? "lg" : ""}
@@ -69,16 +199,81 @@ export const TodoList = () => {
             : "Cancelar"
         }
         btnYesEvent={
-          modal.entry === "detail" ? null : () => handleModalAction()
+          modal.entry === "detail" ? null : () => handleModalAction(modal.entry)
         }
         onHide={() => handleCloseModal()}
       >
         <div className="container">
-          {modal.entry === "edit" && (
-            <CustomForm {...modal.data} isEditing={true} />
-          )}
           {modal.entry === "detail" && <ShowDetails {...modal.data} />}
-          {modal.entry === "creating" && <CustomForm />}
+
+          {modal.entry === "creating" || modal.entry === "edit" ? (
+            <Form>
+              <Form.Group className="mb-3 row" controlId="formBasicEmail">
+                <div className="col-lg-6 col-md-6 col-xs-12">
+                  <Form.Label>Nombre </Form.Label>
+                  <Form.Control
+                    value={modal.data?.name}
+                    onChange={(e) =>
+                      setModal({
+                        ...modal,
+                        data: { ...modal.data, name: e.target.value },
+                      })
+                    }
+                    type="text"
+                    placeholder="Bañar al perro"
+                  />
+                </div>
+                <div className="col-lg-6 col-md-6 col-xs-12">
+                  <Form.Label>Descripción </Form.Label>
+                  <Form.Control
+                    value={modal.data?.description}
+                    onChange={(e) =>
+                      setModal({
+                        ...modal,
+                        data: { ...modal.data, description: e.target.value },
+                      })
+                    }
+                    as="textarea"
+                    type="text"
+                    placeholder="Hoy realizaré esta tarea..."
+                  />
+                </div>
+              </Form.Group>
+
+              <Form.Group className="mb-3 row" controlId="formBasicEmail">
+                <div className="col-lg-6 col-md-6 col-xs-12">
+                  <Form.Label>Fecha </Form.Label>
+                  <Form.Control
+                    value={modal.data?.date}
+                    onChange={(e) =>
+                      setModal({
+                        ...modal,
+                        data: { ...modal.data, date: e.target.value },
+                      })
+                    }
+                    type="date"
+                    placeholder={today()}
+                  />
+                </div>
+                <div className="col-lg-6 col-md-6 col-xs-12">
+                  <Form.Label>Hora </Form.Label>
+                  <Form.Control
+                    value={modal.data?.hour}
+                    onChange={(e) =>
+                      setModal({
+                        ...modal,
+                        data: { ...modal.data, hour: e.target.value },
+                      })
+                    }
+                    type="time"
+                    placeholder="00:00:00"
+                  />
+                </div>
+              </Form.Group>
+            </Form>
+          ) : (
+            <></>
+          )}
           {modal.entry === "remove" && (
             <h4 className="mb-4 text-center text-secondary">{`¿Está seguro de eliminar la tarea ${modal.data?.name}`}</h4>
           )}
@@ -90,7 +285,7 @@ export const TodoList = () => {
         </div>
       </CustomModal>
 
-      <div className="container techStackSection">
+      <div className="container techStackSection mb-5">
         <div className="sectionTitle">
           <h5>Cosas que hacer </h5>
           <Line backgroundColor="green" width={"4.5rem"} />
@@ -128,7 +323,7 @@ export const TodoList = () => {
                       title={e.description}
                     >
                       <div
-                        className={"techContent"}
+                        className={"techContent "}
                         onClick={() => handleShowModal(e, "detail")}
                       >
                         <span className="d-flex justify-content-evenly">
@@ -152,7 +347,7 @@ export const TodoList = () => {
 
                         <p className="text-center">
                           {!isEmptyOrUndefined(e.description)
-                            ? `${e.description.slice(0, 50)}...`
+                            ? `${e.description.slice(0, 30)}...`
                             : "Tarea sin descripción"}
                         </p>
 
@@ -170,17 +365,18 @@ export const TodoList = () => {
                               handleShowModal(e, "remove");
                             }}
                           />
-
-                          <BsFillPencilFill
-                            size={20}
-                            color="#3d7b91"
-                            title="Editar"
-                            className="iconHover"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleShowModal(e, "edit");
-                            }}
-                          />
+                          {e.status === false && (
+                            <BsFillPencilFill
+                              size={20}
+                              color="#3d7b91"
+                              title="Editar"
+                              className="iconHover"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleShowModal(e, "edit");
+                              }}
+                            />
+                          )}
                         </section>
                       </div>
                     </div>

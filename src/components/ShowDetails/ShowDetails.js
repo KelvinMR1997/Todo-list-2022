@@ -5,14 +5,16 @@ import { convertDate, cutHour } from "../helpers/helpers";
 export const ShowDetails = (props) => {
   return (
     <>
-      <div className="container mb-3">
+      <div className="container mb-3 "
+      style={{ wordBreak: "break-all"}}
+      >
         <div className="row bordered">
           <label className="col-lg-6 col-md6 col-xs-12">Nombre: </label>
           <p className="col-lg-6 col-md6 col-xs-12">{props?.name}</p>
         </div>
         <div className="row bordered">
-          <label className="col-lg-6 col-md6 col-xs-12">Descripcion: </label>
-          <p className="col-lg-6 col-md6 col-xs-12">{props?.description}</p>
+          <label className="col-lg-6 col-md6 col-xs-12 ">Descripcion: </label>
+          <p className="col-lg-6 col-md6 col-xs-12 ">{props?.description}</p>
         </div>
         <div className="row bordered">
           <label className="col-lg-6 col-md6 col-xs-12">Fecha: </label>
