@@ -185,7 +185,7 @@ export const TodoList = () => {
           modal.entry === "remove"
             ? "Eliminar"
             : modal.entry === "changeStatus"
-            ? "Si,terminé"
+            ? "Si, terminé"
             : modal.entry === "edit"
             ? "Actualizar"
             : "Guardar"
@@ -195,7 +195,7 @@ export const TodoList = () => {
           modal.entry === "detail"
             ? "Listo"
             : modal.entry === "changeStatus"
-            ? "No,cancelar"
+            ? "No, cancelar"
             : "Cancelar"
         }
         btnYesEvent={
@@ -275,7 +275,7 @@ export const TodoList = () => {
             <></>
           )}
           {modal.entry === "remove" && (
-            <h4 className="mb-4 text-center text-secondary">{`¿Está seguro de eliminar la tarea ${modal.data?.name}`}</h4>
+            <h4 className="mb-4 text-center text-secondary">{`¿ Está seguro de eliminar la tarea ${modal.data?.name} ?`}</h4>
           )}
           {modal.entry === "changeStatus" && (
             <h4 className="mb-4 text-center text-info">
@@ -286,9 +286,9 @@ export const TodoList = () => {
       </CustomModal>
 
       <div className="container techStackSection mb-5">
-        <div className="sectionTitle">
-          <h5>Cosas que hacer </h5>
-          <Line backgroundColor="green" width={"4.5rem"} />
+        <div className="sectionTitle text-center text-primary">
+          <h1>Cosas que hacer </h1>
+          <Line backgroundColor="green" width={"13.5rem"} />
         </div>
         {tasksLoader ? (
           <CustomSpinner />
@@ -306,7 +306,7 @@ export const TodoList = () => {
                 >
                   <div
                     className="d-flex justify-content-center "
-                    style={{ padding: "5.2rem" }}
+                    style={{ padding: "4.5rem" }}
                   >
                     <BsPlusSquare size={40} color="rgb(61, 123, 145)" />
                   </div>
@@ -351,9 +351,10 @@ export const TodoList = () => {
                             : "Tarea sin descripción"}
                         </p>
 
-                        <p>{`Fecha: ${convertDate(e.date)}`}</p>
-                        <p>{`Hora: ${cutHour(e.hour)}`}</p>
-
+                        <p>
+                          <b className="text-primary fw-600" >Fecha : </b>{convertDate(e.date)}
+                        </p>
+                        <p><b className="text-primary fw-600">Hora : </b>{cutHour(e.hour)}</p>
                         <section className="d-flex justify-content-end actionSection">
                           <BsFillTrashFill
                             size={20}

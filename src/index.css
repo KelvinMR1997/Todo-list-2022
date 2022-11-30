@@ -33,3 +33,6 @@ textarea:focus {
   border-bottom: 1px dashed rgb(150, 148, 148);
   /* border-left: 2px dashed rgb(150, 148, 148); */
 }
+.fw-600 {
+  font-weight: 600;
+}
